@@ -33,7 +33,7 @@ class LogprobPhrase:
 class StreamingLogprobSplitterState:
     """Stores state for a StreaminglogprobSplitter."""
 
-    past_logprobs: npt.NDArray[np.float32] = field(default_factory=lambda: np.zeros((0, 35), dtype=np.float32))
+    past_logprobs: npt.NDArray[np.float32] = field(default_factory=lambda: np.zeros((0, 0), dtype=np.float32))
     offset: int = 0
 
 
@@ -129,8 +129,11 @@ class StreamingLogprobSplitter:
         speech_expand = self.SPEECH_EXPAND_SIZE
 
         # Step 1. Combine old logprobs (from state) with new ones
-        logprobs = np.concatenate((state.past_logprobs, logprobs), axis=-2)
+        # Handle empty initial state by matching vocab size
+        if state.past_logprobs.size == 0:
+            state.past_logprobs = np.zeros((0, logprobs.shape[-1]), dtype=np.float32)
 
+        logprobs = np.concatenate((state.past_logprobs, logprobs), axis=-2)
         # Step 2. If the probability of space + blank tokens is less than a threshold, consider it as speech
         is_speech = np.exp(logprobs[..., -2:]).sum(axis=-1) <= self.SILENCE_THRESHOLD
 
