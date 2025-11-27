@@ -113,8 +113,9 @@ class StreamingLogprobSplitter:
         """
         if not isinstance(logprobs, np.ndarray):
             raise TypeError(f"Incorrect 'logprobs' type: expected np.ndarray, but got {type(logprobs)}")
-        if logprobs.shape[1:] != (35,):
-            raise ValueError(f"Shape of 'logprobs' must be (L, 35), but got {logprobs.shape}")
+        # Make vocab size configurable instead of hardcoded 35
+        if logprobs.ndim != 2:
+            raise ValueError(f"logprobs must be 2D array, got shape {logprobs.shape}")
         if logprobs.dtype != np.float32:
             raise ValueError(f"Incorrect dtype of 'logprobs': expected np.float32, but got {logprobs.dtype}")
 
